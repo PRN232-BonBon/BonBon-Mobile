@@ -56,9 +56,7 @@ class _BonBonAppState extends State<BonBonApp> {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         home: const AuthGate(),
-        routes: {
-          '/register': (_) => const RegisterPage(),
-        },
+        routes: {'/register': (_) => const RegisterPage()},
       ),
     );
   }

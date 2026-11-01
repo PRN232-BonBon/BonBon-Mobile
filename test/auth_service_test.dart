@@ -69,29 +69,28 @@ void main() {
 
     expect(captured.method, 'POST');
     expect(captured.url.toString(), 'http://localhost:5188/api/auth/login');
-    expect(
-      jsonDecode(captured.body),
-      {
-        'email': 'an@example.com',
-        'password': 'matkhau123',
-        'deviceInfo': 'BonBon Mobile',
-      },
-    );
+    expect(jsonDecode(captured.body), {
+      'email': 'an@example.com',
+      'password': 'matkhau123',
+      'deviceInfo': 'BonBon Mobile',
+    });
     expect(result.accessToken, 'new-access');
     expect(result.refreshToken, 'new-refresh');
     expect(result.account.fullName, 'Nguyễn Văn An');
   });
 
   test('lỗi ProblemDetails được đổi thành ApiException', () async {
-    final client = MockClient((_) async => http.Response(
-          jsonEncode({
-            'title': 'Unauthorized',
-            'detail': 'Sai email hoặc mật khẩu.',
-            'status': 401,
-          }),
-          401,
-          headers: {'content-type': 'application/problem+json; charset=utf-8'},
-        ));
+    final client = MockClient(
+      (_) async => http.Response(
+        jsonEncode({
+          'title': 'Unauthorized',
+          'detail': 'Sai email hoặc mật khẩu.',
+          'status': 401,
+        }),
+        401,
+        headers: {'content-type': 'application/problem+json; charset=utf-8'},
+      ),
+    );
 
     final service = AuthService(
       client: client,
@@ -147,7 +146,40 @@ void main() {
 
     await service.logoutAll();
 
-    expect(captured.url.toString(), 'http://localhost:5188/api/auth/logout-all');
+    expect(
+      captured.url.toString(),
+      'http://localhost:5188/api/auth/logout-all',
+    );
     expect(captured.headers['Authorization'], 'Bearer access-token');
+  });
+
+  test('đổi mật khẩu gọi /auth/change-password với token hiện tại', () async {
+    late http.Request captured;
+    final client = MockClient((request) async {
+      captured = request;
+      return http.Response('', 204);
+    });
+
+    final service = AuthService(
+      client: client,
+      tokenStore: MemoryTokenStore(_session),
+      baseUrl: 'http://localhost:5188/api',
+    );
+
+    await service.changePassword(
+      currentPassword: 'matkhau123',
+      newPassword: 'matkhaumoi456',
+    );
+
+    expect(
+      captured.url.toString(),
+      'http://localhost:5188/api/auth/change-password',
+    );
+    expect(captured.method, 'POST');
+    expect(captured.headers['Authorization'], 'Bearer access-token');
+    expect(jsonDecode(captured.body), {
+      'currentPassword': 'matkhau123',
+      'newPassword': 'matkhaumoi456',
+    });
   });
 }

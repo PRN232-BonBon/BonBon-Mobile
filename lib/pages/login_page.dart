@@ -9,7 +9,11 @@ import '../widgets/common.dart';
 
 /// Tương đương `src/pages/LoginPage.tsx`.
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key, this.popOnSuccess = false});
+
+  /// Dùng khi màn hình đăng nhập được mở từ một trang cần auth (tracking):
+  /// đăng nhập xong thì tự đóng để quay lại trang đó.
+  final bool popOnSuccess;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -21,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
 
   bool _loading = false;
+  bool _popScheduled = false;
   String? _error;
 
   @override
@@ -80,6 +85,16 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = AuthScope.of(context);
+    if (widget.popOnSuccess && auth.isAuthenticated && !_popScheduled) {
+      _popScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final navigator = Navigator.of(context);
+        if (navigator.canPop()) navigator.pop();
+      });
+    }
+
     return PageScaffold(
       child: CardSurface(
         padding: const EdgeInsets.fromLTRB(28, 36, 28, 36),

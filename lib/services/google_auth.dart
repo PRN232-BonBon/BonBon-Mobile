@@ -17,8 +17,9 @@ class GoogleAuth {
 
     try {
       await (_initialization ??= instance.initialize(
-        clientId:
-            AppConfig.googleClientId.isEmpty ? null : AppConfig.googleClientId,
+        clientId: AppConfig.googleClientId.isEmpty
+            ? null
+            : AppConfig.googleClientId,
         serverClientId: AppConfig.googleServerClientId.isEmpty
             ? null
             : AppConfig.googleServerClientId,
@@ -37,7 +38,8 @@ class GoogleAuth {
       if (idToken == null || idToken.isEmpty) {
         throw const ApiException(
           title: 'Google login thất bại',
-          detail: 'Không lấy được idToken. Kiểm tra GOOGLE_SERVER_CLIENT_ID '
+          detail:
+              'Không lấy được idToken. Kiểm tra GOOGLE_SERVER_CLIENT_ID '
               '(Web client ID) và SHA-1 của app trên Google Cloud Console.',
         );
       }

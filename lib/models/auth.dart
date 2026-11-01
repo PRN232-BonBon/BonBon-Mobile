@@ -29,12 +29,12 @@ class AccountInfo {
   final List<String> roles;
 
   Map<String, dynamic> toJson() => {
-        'accountId': accountId,
-        'email': email,
-        'fullName': fullName,
-        'displayName': displayName,
-        'roles': roles,
-      };
+    'accountId': accountId,
+    'email': email,
+    'fullName': fullName,
+    'displayName': displayName,
+    'roles': roles,
+  };
 }
 
 class AuthResponse {
@@ -46,14 +46,13 @@ class AuthResponse {
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
-        accessToken: (json['accessToken'] ?? '').toString(),
-        refreshToken: (json['refreshToken'] ?? '').toString(),
-        accessTokenExpiresAt:
-            (json['accessTokenExpiresAt'] as num?)?.toInt() ?? 0,
-        account: AccountInfo.fromJson(
-          (json['account'] as Map?)?.cast<String, dynamic>() ?? const {},
-        ),
-      );
+    accessToken: (json['accessToken'] ?? '').toString(),
+    refreshToken: (json['refreshToken'] ?? '').toString(),
+    accessTokenExpiresAt: (json['accessTokenExpiresAt'] as num?)?.toInt() ?? 0,
+    account: AccountInfo.fromJson(
+      (json['account'] as Map?)?.cast<String, dynamic>() ?? const {},
+    ),
+  );
 
   final String accessToken;
   final String refreshToken;
@@ -73,10 +72,10 @@ class LoginRequest {
   final String? deviceInfo;
 
   Map<String, dynamic> toJson() => {
-        'email': email,
-        'password': password,
-        if (deviceInfo != null) 'deviceInfo': deviceInfo,
-      };
+    'email': email,
+    'password': password,
+    if (deviceInfo != null) 'deviceInfo': deviceInfo,
+  };
 }
 
 class RegisterRequest {
@@ -95,21 +94,17 @@ class RegisterRequest {
   final String? phone;
 
   Map<String, dynamic> toJson() => {
-        'email': email,
-        'password': password,
-        'fullName': fullName,
-        if (displayName != null) 'displayName': displayName,
-        if (phone != null) 'phone': phone,
-      };
+    'email': email,
+    'password': password,
+    'fullName': fullName,
+    if (displayName != null) 'displayName': displayName,
+    if (phone != null) 'phone': phone,
+  };
 }
 
 /// Lỗi đã chuẩn hoá từ ProblemDetails của backend.
 class ApiException implements Exception {
-  const ApiException({
-    required this.title,
-    this.detail,
-    this.status = 0,
-  });
+  const ApiException({required this.title, this.detail, this.status = 0});
 
   final String title;
   final String? detail;

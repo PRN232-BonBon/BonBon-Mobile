@@ -54,6 +54,12 @@ class FakeAuthApi implements AuthApi {
 
   @override
   Future<void> logoutAll() async {}
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {}
 }
 
 class MemoryTokenStore implements TokenStore {
@@ -75,10 +81,7 @@ class MemoryTokenStore implements TokenStore {
   }
 }
 
-AuthController buildController({
-  AuthApi? api,
-  TokenStore? tokenStore,
-}) =>
+AuthController buildController({AuthApi? api, TokenStore? tokenStore}) =>
     AuthController(
       api: api ?? FakeAuthApi(),
       tokenStore: tokenStore ?? MemoryTokenStore(),
@@ -97,8 +100,9 @@ void main() {
     expect(find.text('Chưa có tài khoản?'), findsOneWidget);
   });
 
-  testWidgets('bỏ trống email/mật khẩu thì báo lỗi, không gọi API',
-      (tester) async {
+  testWidgets('bỏ trống email/mật khẩu thì báo lỗi, không gọi API', (
+    tester,
+  ) async {
     final api = FakeAuthApi();
     final controller = buildController(api: api);
     addTearDown(controller.dispose);
@@ -145,8 +149,9 @@ void main() {
     expect(find.text('CUSTOMER'), findsOneWidget);
   });
 
-  testWidgets('hiển thị lỗi trả về từ API khi đăng nhập thất bại',
-      (tester) async {
+  testWidgets('hiển thị lỗi trả về từ API khi đăng nhập thất bại', (
+    tester,
+  ) async {
     final controller = buildController(
       api: FakeAuthApi(
         error: const ApiException(
@@ -176,8 +181,9 @@ void main() {
     expect(find.text('Sai email hoặc mật khẩu.'), findsOneWidget);
   });
 
-  testWidgets('đăng ký: mật khẩu xác nhận không khớp thì báo lỗi',
-      (tester) async {
+  testWidgets('đăng ký: mật khẩu xác nhận không khớp thì báo lỗi', (
+    tester,
+  ) async {
     final api = FakeAuthApi();
     final controller = buildController(api: api);
     addTearDown(controller.dispose);
@@ -205,9 +211,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Nhập lại mật khẩu'),
       'khac-nhau',
     );
-    await tester.ensureVisible(
-      find.widgetWithText(ElevatedButton, 'Đăng ký'),
-    );
+    await tester.ensureVisible(find.widgetWithText(ElevatedButton, 'Đăng ký'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ElevatedButton, 'Đăng ký'));
     await tester.pumpAndSettle();
@@ -216,8 +220,9 @@ void main() {
     expect(api.registrations, isEmpty);
   });
 
-  testWidgets('đăng ký thành công thì vào Dashboard và lưu phiên',
-      (tester) async {
+  testWidgets('đăng ký thành công thì vào Dashboard và lưu phiên', (
+    tester,
+  ) async {
     final api = FakeAuthApi();
     final store = MemoryTokenStore();
     final controller = buildController(api: api, tokenStore: store);
@@ -250,9 +255,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Tuỳ chọn').first,
       'bee',
     );
-    await tester.ensureVisible(
-      find.widgetWithText(ElevatedButton, 'Đăng ký'),
-    );
+    await tester.ensureVisible(find.widgetWithText(ElevatedButton, 'Đăng ký'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ElevatedButton, 'Đăng ký'));
     await tester.pumpAndSettle();
@@ -265,8 +268,9 @@ void main() {
     expect(find.text('Đăng xuất'), findsOneWidget);
   });
 
-  testWidgets('đăng xuất quay về màn hình đăng nhập và xoá phiên',
-      (tester) async {
+  testWidgets('đăng xuất quay về màn hình đăng nhập và xoá phiên', (
+    tester,
+  ) async {
     final store = MemoryTokenStore(
       const StoredSession(
         accessToken: 'access-token',
@@ -291,8 +295,9 @@ void main() {
     expect(find.text('Nguyễn Văn An'), findsNothing);
   });
 
-  testWidgets('token dài được rút gọn và bấm Xem để hiện đầy đủ',
-      (tester) async {
+  testWidgets('token dài được rút gọn và bấm Xem để hiện đầy đủ', (
+    tester,
+  ) async {
     const accessToken =
         'a-very-long-access-token-that-is-definitely-over-48-chars';
     final store = MemoryTokenStore(
@@ -312,7 +317,10 @@ void main() {
     final collapsed = '${accessToken.substring(0, 48)}…';
     expect(find.text(collapsed), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Xem').first);
+    final showButton = find.widgetWithText(TextButton, 'Xem').first;
+    await tester.ensureVisible(showButton);
+    await tester.pumpAndSettle();
+    await tester.tap(showButton);
     await tester.pumpAndSettle();
 
     expect(find.text(accessToken), findsOneWidget);

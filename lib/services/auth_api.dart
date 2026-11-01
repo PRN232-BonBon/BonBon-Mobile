@@ -19,16 +19,18 @@ abstract interface class AuthApi {
   Future<void> logout(String refreshToken);
 
   Future<void> logoutAll();
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
 }
 
 /// Gọi các endpoint `/api/auth/*` giống `src/services/authService.ts`.
 class AuthService implements AuthApi {
-  AuthService({
-    http.Client? client,
-    required this.tokenStore,
-    String? baseUrl,
-  })  : _client = client ?? http.Client(),
-        _baseUrl = _normalize(baseUrl ?? AppConfig.apiBaseUrl);
+  AuthService({http.Client? client, required this.tokenStore, String? baseUrl})
+    : _client = client ?? http.Client(),
+      _baseUrl = _normalize(baseUrl ?? AppConfig.apiBaseUrl);
 
   final http.Client _client;
   final TokenStore tokenStore;
@@ -73,16 +75,24 @@ class AuthService implements AuthApi {
 
   @override
   Future<void> logout(String refreshToken) async {
-    await _send(
-      'POST',
-      '/logout',
-      body: {'refreshToken': refreshToken},
-    );
+    await _send('POST', '/logout', body: {'refreshToken': refreshToken});
   }
 
   @override
   Future<void> logoutAll() async {
     await _send('POST', '/logout-all');
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _send(
+      'POST',
+      '/change-password',
+      body: {'currentPassword': currentPassword, 'newPassword': newPassword},
+    );
   }
 
   /// Gửi request, tự gắn Bearer token (tương đương axios interceptor).
@@ -104,15 +114,14 @@ class AuthService implements AuthApi {
 
     final http.Response response;
     try {
-      final request = http.Request(method, _uri(path))
-        ..headers.addAll(headers);
+      final request = http.Request(method, _uri(path))..headers.addAll(headers);
       if (body != null) request.body = jsonEncode(body);
       response = await http.Response.fromStream(await _client.send(request));
     } catch (_) {
       // Mất mạng, sai host, cert tự ký… đều quy về lỗi kết nối như bản web.
-      throw const ApiException(
+      throw ApiException(
         title: 'Lỗi kết nối',
-        detail: 'Không thể kết nối tới server.',
+        detail: 'Không thể kết nối tới backend tại $_baseUrl. Kiểm tra backend đang chạy và địa chỉ API phù hợp với thiết bị.',
         status: 0,
       );
     }
